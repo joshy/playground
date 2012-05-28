@@ -3,8 +3,9 @@
  * 
  * There are 9 fire pits which needs all to be set on fire. Initially only
  * the middle one is set on fire. If you set fire on a pit all horizontally
- * and vertically ones will toggle their state.
+ * and vertically ones will toggle their state (only adjacent).
  * 
+ * One solution is [1,3,7,5,8,6,0,2]
  */
 
 "use strict";
@@ -73,19 +74,28 @@ function solve(board) {
 }
 
 function fireOn(board, position) {
-    toggle(board, position - 3);
-    if (position === 1 || position === 2
-       || position === 4 || position === 5
-       || position === 7 || position === 8) {
-	toggle(board, position - 1);	
+    switch (position) {
+    case 0: 
+	return toggle(board, [0,1,3]);
+    case 1: 
+	return toggle(board, [0,1,2,4]);
+    case 2: 
+	return toggle(board, [1,2,5]);
+    case 3: 
+	return toggle(board, [3,4,0,6]);
+    case 4: 
+	return toggle(board, [3,4,5,1,7]);
+    case 5: 
+	return toggle(board, [4,5,2,8]);
+    case 6: 
+	return toggle(board, [6,7,3]);
+    case 7: 
+	return toggle(board, [6,7,8,4]);
+    case 8: 
+	return toggle(board, [7,8,5]); 
+    default: 
+	return console.log("switch default");
     }
-    toggle(board, position);
-    if (position === 0 || position === 1 
-	|| position === 3 || position === 4 
-	|| position === 6 || position === 7) {
-	toggle(board, position + 1);
-    }
-    toggle(board, position + 3);
 };
 
 
@@ -111,33 +121,14 @@ function candidates(board) {
 }
 
 function position2index(position) {
-    switch (position) {
-	case 0: 
-	return {i:0, j:0};
-	case 1: 
-	return {i:0, j:1};
-	case 2: 
-	return {i:0, j:2};
-	case 3: 
-	return {i:1, j:0};
-	case 4: 
-	return {i:1, j:1};
-	case 5: 
-	return {i:1, j:2};
-	case 6: 
-	return {i:2, j:0};
-	case 7: 
-	return {i:2, j:1};
-	case 8: 
-	return {i:2, j:2};
-	default:
-	return undefined;
-    }
+    var i = Math.floor(position / 3);
+    var j = position % 3;
+    return { i:i, j:j };
 }
 
-function toggle(board, position) {
-    var index = position2index(position);
-    if (index) {
+function toggle(board, positions) {
+    for (var i=0; i<positions.length; i++) {
+	var index = position2index(positions[i]);
 	onOff(board[index.i][index.j]);
     }
 }
@@ -147,10 +138,11 @@ function toggle(board, position) {
  * @param cell
  */
 function onOff(cell) {
-    if (cell.status === "off")
+    if (cell.status === "off") {
 	cell.status = "on";
-    else
-	cell.status = "off"; 
+    } else {
+	cell.status = "off";
+    }
 };
 
 /**
