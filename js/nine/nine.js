@@ -74,7 +74,6 @@ function solve(board) {
 }
 
 function fireOn(board, position) {
-    if (position === undefined) return;
     switch (position) {
     case 0: 
 	return toggle(board, [0,1,3]);
