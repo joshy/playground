@@ -58,22 +58,23 @@ function copy(board) {
  */
 function solve(board) {
     var moves = [];
-    while (candidates(board).length > 0) {
-	var c = candidates(board);
-	var index = getRandomInt(c.length - 1);
-	var nextMove = c[index];
+    var candidates = cells(board).filter(candidate);
+    while (candidates.length > 0) {
+	var index = getRandomInt(candidates.length - 1);
+	var nextMoveCell = candidates[index];
 //	console.log("Found #candidates " + c + " index " + index + ", trying position " + nextMove);
-	moves.push(nextMove);
-	fireOn(board, nextMove);
-    }
+	moves.push(nextMoveCell.position);
+	fireOn(board, nextMoveCell.position);
+	candidates = cells(board).filter(candidate);
+    }  
     console.log("Solution found");
     console.log("Moves " + moves);
-    console.log("Candidates " + candidates(board));
     printBoard(board);
     return moves;
 }
 
 function fireOn(board, position) {
+    if (position === undefined) return;
     switch (position) {
     case 0: 
 	return toggle(board, [0,1,3]);
@@ -110,14 +111,19 @@ function getRandomInt(max) {
  * @param board
  * @return array of positions where the fire is off
  */
-function candidates(board) {
+function candidatess(board) {
     var c = [];
+    cells(board).forEach(isCandidate);
     for (var i=0; i<3; i++) {
 	for (var j=0; j<3; j++) {
 	 if (board[i][j].status === "off") c.push(board[i][j].position);   
 	}
     }
     return c;
+}
+
+function candidate(cell) {
+    return (cell.status === "off");
 }
 
 function position2index(position) {
@@ -159,4 +165,14 @@ function printBoard(board) {
 	b += '\n';
     }
     console.log(b);
+}
+
+function cells(board) {
+    var cells = [];
+    for (var i=0; i<3; i++) {
+	for (var j=0; j<3; j++)	{
+	    cells.push(board[i][j]);
+	}
+    }
+    return cells;
 }
