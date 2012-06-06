@@ -105,42 +105,23 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * (max + 1));
 }
 
-/**
- * How many pits are not on fire.
- * @param board
- * @return array of positions where the fire is off
- */
-function candidatess(board) {
-    var c = [];
-    cells(board).forEach(isCandidate);
-    for (var i=0; i<3; i++) {
-	for (var j=0; j<3; j++) {
-	 if (board[i][j].status === "off") c.push(board[i][j].position);   
-	}
-    }
-    return c;
-}
-
 function candidate(cell) {
     return (cell.status === "off");
 }
 
-function position2index(position) {
-    var i = Math.floor(position / 3);
-    var j = position % 3;
-    return { i:i, j:j };
-}
-
 function toggle(board, positions) {
-    for (var i=0; i<positions.length; i++) {
-	var index = position2index(positions[i]);
-	onOff(board[index.i][index.j]);
-    }
+    var x = function(cell) {
+	if (positions.indexOf(cell.position) > -1) {
+	    onOff(cell);
+	}
+    };
+
+    cellIterate(board, x);
 }
 
 /**
  * Changes the state of the cell.
- * @param cell
+ * @param cell cell to toggle
  */
 function onOff(cell) {
     if (cell.status === "off") {
@@ -152,26 +133,44 @@ function onOff(cell) {
 
 /**
  * Prints the board in a human readable format.
- * @param board
+ * @param board the board
  */
 function printBoard(board) {
-    var b = "";
-    for (var i=0; i<3; i++) {
-	for (var j=0; j<3; j++)	{
-	    b += board[i][j].status;
-	    if (j < 2 )	b += ",";
-	}
-	b += '\n';
-    }
-    console.log(b);
+    var b = board.map(function(row) {
+	return row.map(function(cell) {
+	    return cell.status;
+	}).join(', ');
+    }).join('\n');
+    console.log(b);	 
 }
 
+function filterCell(cell, positions) {
+    return (positions.indexOf(cell.position) > -1);
+}
+
+
+/**
+ * A function which applied f to all
+ * cells of the board.
+ * @param board the board
+ * @param f function to apply on all cells
+ */
+function cellIterate(board, f) {
+    board.forEach(function (row) {
+	row.forEach(function (cell) {
+	    f(cell);
+	});
+    });
+}
+
+/**
+ * Returns all cells of the board.
+ * @param board
+ */
 function cells(board) {
     var cells = [];
-    for (var i=0; i<3; i++) {
-	for (var j=0; j<3; j++)	{
-	    cells.push(board[i][j]);
-	}
-    }
+    cellIterate(board, function(cell) {
+	cells.push(cell);
+    });
     return cells;
 }
