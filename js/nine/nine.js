@@ -10,10 +10,80 @@
 
 "use strict";
 
-var board =  
-    [ [{position: 0, status: "off"}, {position: 1, status : "off"}, {position: 2, status: "off"}],
-      [{position: 3, status: "off"}, {position: 4, status : "on"},  {position: 5, status: "off"}],
-      [{position: 6, status: "off"}, {position: 7, status : "off"}, {position: 8, status: "off"}]];
+var board =  {
+
+    internal: [ [{position: 0, status: "off"}, {position: 1, status : "off"}, {position: 2, status: "off"}],
+		[{position: 3, status: "off"}, {position: 4, status : "on"},  {position: 5, status: "off"}],
+		[{position: 6, status: "off"}, {position: 7, status : "off"}, {position: 8, status: "off"}]
+	      ],
+    
+    cellIterate : function(f) {
+	this.internal.forEach(function (row) {
+	    row.forEach(function (cell) {
+		f(cell);
+	    });
+	});
+    },
+    
+    toggle : function (positions) {
+	var x = function(cell) {
+	    if (positions.indexOf(cell.position) > -1) {
+		cell.status === "off" ? cell.status = "on" : cell.status = "off";
+	    }
+	};
+	this.cellIterate(x);
+    }, 
+    
+    
+    fireOn : function fireOn(position) {
+	switch (position) {
+	case 0: 
+	    return this.toggle([0,1,3]);
+	case 1: 
+	    return this.toggle([0,1,2,4]);
+	case 2: 
+	    return this.toggle([1,2,5]);
+	case 3: 
+	    return this.toggle([3,4,0,6]);
+	case 4: 
+	    return this.toggle([3,4,5,1,7]);
+	case 5: 
+	    return this.toggle([4,5,2,8]);
+	case 6: 
+	    return this.toggle([6,7,3]);
+	case 7: 
+	    return this.toggle([6,7,8,4]);
+	case 8: 
+	    return this.toggle([7,8,5]); 
+	default: 
+	    return console.log("switch default");
+	}
+    },
+    
+
+
+    print : function() {
+	var b = this.internal.map(function(row) {
+	    return row.map(function(cell) {
+		return cell.status;
+	    }).join(', ');
+	}).join('\n');
+	return b;
+    },
+
+    /**
+     * Returns all cells of the board.
+     * @param board
+     */
+    cells : function() {
+	var cells = [];
+	this.cellIterate(function(cell) {
+	    cells.push(cell);
+	});
+	return cells;
+    }
+    
+};
       
 
 function verify(board, moves) {
@@ -58,46 +128,20 @@ function copy(board) {
  */
 function solve(board) {
     var moves = [];
-    var candidates = cells(board).filter(candidate);
+    var candidates = board.cells().filter(candidate);
     while (candidates.length > 0) {
 	var index = getRandomInt(candidates.length - 1);
 	var nextMoveCell = candidates[index];
 //	console.log("Found #candidates " + c + " index " + index + ", trying position " + nextMove);
 	moves.push(nextMoveCell.position);
-	fireOn(board, nextMoveCell.position);
-	candidates = cells(board).filter(candidate);
+	board.fireOn(nextMoveCell.position);
+	candidates = board.cells().filter(candidate);
     }  
     console.log("Solution found");
     console.log("Moves " + moves);
-    printBoard(board);
+    board.print();
     return moves;
 }
-
-function fireOn(board, position) {
-    switch (position) {
-    case 0: 
-	return toggle(board, [0,1,3]);
-    case 1: 
-	return toggle(board, [0,1,2,4]);
-    case 2: 
-	return toggle(board, [1,2,5]);
-    case 3: 
-	return toggle(board, [3,4,0,6]);
-    case 4: 
-	return toggle(board, [3,4,5,1,7]);
-    case 5: 
-	return toggle(board, [4,5,2,8]);
-    case 6: 
-	return toggle(board, [6,7,3]);
-    case 7: 
-	return toggle(board, [6,7,8,4]);
-    case 8: 
-	return toggle(board, [7,8,5]); 
-    default: 
-	return console.log("switch default");
-    }
-};
-
 
 // Returns a random integer between min and max
 // Using Math.round() will give you a non-uniform distribution!
@@ -105,11 +149,8 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * (max + 1));
 }
 
-function candidate(cell) {
-    return (cell.status === "off");
-}
 
-function toggle(board, positions) {
+function _toggle(board, positions) {
     var x = function(cell) {
 	if (positions.indexOf(cell.position) > -1) {
 	    onOff(cell);
@@ -119,17 +160,7 @@ function toggle(board, positions) {
     cellIterate(board, x);
 }
 
-/**
- * Changes the state of the cell.
- * @param cell cell to toggle
- */
-function onOff(cell) {
-    if (cell.status === "off") {
-	cell.status = "on";
-    } else {
-	cell.status = "off";
-    }
-};
+
 
 /**
  * Prints the board in a human readable format.
@@ -155,7 +186,7 @@ function filterCell(cell, positions) {
  * @param board the board
  * @param f function to apply on all cells
  */
-function cellIterate(board, f) {
+function _cellIterate(board, f) {
     board.forEach(function (row) {
 	row.forEach(function (cell) {
 	    f(cell);
@@ -163,14 +194,8 @@ function cellIterate(board, f) {
     });
 }
 
-/**
- * Returns all cells of the board.
- * @param board
- */
-function cells(board) {
-    var cells = [];
-    cellIterate(board, function(cell) {
-	cells.push(cell);
-    });
-    return cells;
+
+function candidate(cell) {
+    return (cell.status === "off");
 }
+
