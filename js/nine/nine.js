@@ -10,78 +10,102 @@
 
 "use strict";
 
-var board =  {
+function Board()  {
 
-    internal: [ [{position: 0, status: "off"}, {position: 1, status : "off"}, {position: 2, status: "off"}],
-		[{position: 3, status: "off"}, {position: 4, status : "on"},  {position: 5, status: "off"}],
-		[{position: 6, status: "off"}, {position: 7, status : "off"}, {position: 8, status: "off"}]
-	      ],
+
+    this.solve = function() {
+	var moves = [];
+	var candidates = cells().filter(candidate);
+	while (candidates.length > 0) {
+	    var index = randomInt(candidates.length - 1);
+	    var nextMoveCell = candidates[index];
+	    //	console.log("Found #candidates " + c + " index " + index + ", trying position " + nextMove);
+	    moves.push(nextMoveCell.position);
+	    fireOn(nextMoveCell.position);
+	    candidates = cells().filter(candidate);
+	}  
+	return moves;
+    };
+
+
+    var internal = [ [{position: 0, status: "off"}, {position: 1, status : "off"}, {position: 2, status: "off"}],
+		      [{position: 3, status: "off"}, {position: 4, status : "on"},  {position: 5, status: "off"}],
+		      [{position: 6, status: "off"}, {position: 7, status : "off"}, {position: 8, status: "off"}]
+		    ];
     
-    cellIterate : function(f) {
-	this.internal.forEach(function (row) {
+    
+    
+    var cellIterate = function(f) {
+	internal.forEach(function (row) {
 	    row.forEach(function (cell) {
 		f(cell);
 	    });
 	});
-    },
+    };
     
-    toggle : function (positions) {
+    var toggle = function (positions) {
 	var x = function(cell) {
 	    if (positions.indexOf(cell.position) > -1) {
 		cell.status === "off" ? cell.status = "on" : cell.status = "off";
 	    }
 	};
-	this.cellIterate(x);
-    }, 
+	cellIterate(x);
+    };
     
     
-    fireOn : function fireOn(position) {
+    var fireOn = function fireOn(position) {
 	switch (position) {
 	case 0: 
-	    return this.toggle([0,1,3]);
+	    return toggle([0,1,3]);
 	case 1: 
-	    return this.toggle([0,1,2,4]);
+	    return toggle([0,1,2,4]);
 	case 2: 
-	    return this.toggle([1,2,5]);
+	    return toggle([1,2,5]);
 	case 3: 
-	    return this.toggle([3,4,0,6]);
+	    return toggle([3,4,0,6]);
 	case 4: 
-	    return this.toggle([3,4,5,1,7]);
+	    return toggle([3,4,5,1,7]);
 	case 5: 
-	    return this.toggle([4,5,2,8]);
+	    return toggle([4,5,2,8]);
 	case 6: 
-	    return this.toggle([6,7,3]);
+	    return toggle([6,7,3]);
 	case 7: 
-	    return this.toggle([6,7,8,4]);
+	    return toggle([6,7,8,4]);
 	case 8: 
-	    return this.toggle([7,8,5]); 
+	    return toggle([7,8,5]); 
 	default: 
-	    return console.log("switch default");
+	    return undefined;
 	}
-    },
+    };
     
 
 
-    print : function() {
-	var b = this.internal.map(function(row) {
+    var print = function() {
+	var b = internal.map(function(row) {
 	    return row.map(function(cell) {
 		return cell.status;
 	    }).join(', ');
 	}).join('\n');
 	return b;
-    },
+    };
 
     /**
      * Returns all cells of the board.
-     * @param board
      */
-    cells : function() {
+    var cells = function() {
 	var cells = [];
-	this.cellIterate(function(cell) {
+	cellIterate(function(cell) {
 	    cells.push(cell);
 	});
 	return cells;
-    }
+    };
+
+
+    // Returns a random integer between min and max
+    // Using Math.round() will give you a non-uniform distribution!
+    var randomInt = function(max) {
+	return Math.floor(Math.random() * (max + 1));
+    };
     
 };
       
@@ -96,16 +120,14 @@ function verify(board, moves) {
 /**
  * This simply runs the solve methods and just keeps
  * the solution with the lowest moves.
- * @param board intial board
  * @param how many runy to try
  */
-function minimum(board, runs) {
-    var m = solve(copy(board));
+function minimum(runs) {
+    var m = new Board().solve();
     
     console.log("Starting to run " + runs + " times");
     for (var i=0; i<runs; i++) {
-	var b = copy(board);
-	var mnew = solve(b);
+	var mnew = new Board().solve();
 	if (mnew.length < m.length) m = mnew;
     }
     console.log("Local minimum found " + m);
@@ -141,12 +163,6 @@ function solve(board) {
     console.log("Moves " + moves);
     board.print();
     return moves;
-}
-
-// Returns a random integer between min and max
-// Using Math.round() will give you a non-uniform distribution!
-function getRandomInt(max) {
-  return Math.floor(Math.random() * (max + 1));
 }
 
 
