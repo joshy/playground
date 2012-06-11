@@ -99,6 +99,10 @@ function Board()  {
     var randomInt = function(max) {
 	return Math.floor(Math.random() * (max + 1));
     };
+
+    var candidate = function(cell) {
+	return (cell.status === "off");
+    };
     
 };
 
