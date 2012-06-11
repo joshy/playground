@@ -12,7 +12,6 @@
 
 function Board()  {
 
-
     this.solve = function() {
 	var moves = [];
 	var candidates = cells().filter(candidate);
@@ -27,14 +26,12 @@ function Board()  {
 	return moves;
     };
 
-
-    var internal = [ [{position: 0, status: "off"}, {position: 1, status : "off"}, {position: 2, status: "off"}],
-		      [{position: 3, status: "off"}, {position: 4, status : "on"},  {position: 5, status: "off"}],
-		      [{position: 6, status: "off"}, {position: 7, status : "off"}, {position: 8, status: "off"}]
-		    ];
-    
-    
-    
+    var internal = [ 
+	[{position: 0, status: "off"}, {position: 1, status : "off"}, {position: 2, status: "off"}],
+	[{position: 3, status: "off"}, {position: 4, status : "on"},  {position: 5, status: "off"}],
+	[{position: 6, status: "off"}, {position: 7, status : "off"}, {position: 8, status: "off"}]
+    ];
+        
     var cellIterate = function(f) {
 	internal.forEach(function (row) {
 	    row.forEach(function (cell) {
@@ -51,7 +48,6 @@ function Board()  {
 	};
 	cellIterate(x);
     };
-    
     
     var fireOn = function fireOn(position) {
 	switch (position) {
@@ -77,8 +73,6 @@ function Board()  {
 	    return undefined;
 	}
     };
-    
-
 
     var print = function() {
 	var b = internal.map(function(row) {
@@ -100,7 +94,6 @@ function Board()  {
 	return cells;
     };
 
-
     // Returns a random integer between min and max
     // Using Math.round() will give you a non-uniform distribution!
     var randomInt = function(max) {
@@ -108,14 +101,6 @@ function Board()  {
     };
     
 };
-      
-
-function verify(board, moves) {
-    for (var i=0; i<moves.length; i++) {
-	fireOn(board, moves[i]);
-	printBoard(board);
-    }    
-}
 
 /**
  * This simply runs the solve methods and just keeps
@@ -130,88 +115,5 @@ function minimum(runs) {
 	var mnew = new Board().solve();
 	if (mnew.length < m.length) m = mnew;
     }
-    console.log("Local minimum found " + m);
-    
+    console.log("Local minimum found " + m);    
 }
-
-/**
- * Copy the board.
- * @param board
- * @return new board
- */
-function copy(board) {
-    return JSON.parse(JSON.stringify(board));
-}
-
-/**
- * Solves the riddle by trial. 
- * @param board
- * @return array of moves of the solution
- */
-function solve(board) {
-    var moves = [];
-    var candidates = board.cells().filter(candidate);
-    while (candidates.length > 0) {
-	var index = getRandomInt(candidates.length - 1);
-	var nextMoveCell = candidates[index];
-//	console.log("Found #candidates " + c + " index " + index + ", trying position " + nextMove);
-	moves.push(nextMoveCell.position);
-	board.fireOn(nextMoveCell.position);
-	candidates = board.cells().filter(candidate);
-    }  
-    console.log("Solution found");
-    console.log("Moves " + moves);
-    board.print();
-    return moves;
-}
-
-
-function _toggle(board, positions) {
-    var x = function(cell) {
-	if (positions.indexOf(cell.position) > -1) {
-	    onOff(cell);
-	}
-    };
-
-    cellIterate(board, x);
-}
-
-
-
-/**
- * Prints the board in a human readable format.
- * @param board the board
- */
-function printBoard(board) {
-    var b = board.map(function(row) {
-	return row.map(function(cell) {
-	    return cell.status;
-	}).join(', ');
-    }).join('\n');
-    console.log(b);	 
-}
-
-function filterCell(cell, positions) {
-    return (positions.indexOf(cell.position) > -1);
-}
-
-
-/**
- * A function which applied f to all
- * cells of the board.
- * @param board the board
- * @param f function to apply on all cells
- */
-function _cellIterate(board, f) {
-    board.forEach(function (row) {
-	row.forEach(function (cell) {
-	    f(cell);
-	});
-    });
-}
-
-
-function candidate(cell) {
-    return (cell.status === "off");
-}
-
